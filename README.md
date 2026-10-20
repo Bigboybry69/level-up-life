@@ -20,7 +20,7 @@ Push this project to the repository's `main` branch. In GitHub **Settings → Pa
 
 ## First version
 
-- Choose a name, fantasy class, ancestry, and optional gender. Choices are cosmetic, inspired by 5e tabletop character creation, without a full 5e rules implementation.
+- Choose a name, fantasy class, ancestry, gender (male or female), and age (teen, adult, or elderly). Nine ancestry-specific illustration atlases provide 54 appearance combinations with a live preview. Choices are cosmetic, inspired by 5e tabletop character creation, without a full 5e rules implementation.
 - Log today's total steps from your phone/watch. Updating a total replaces it instead of double-counting. Every 100 steps earns 5 XP; every 500 XP grants a level. The walking quest shows XP already earned, without a second bonus.
 - Optional GPS walks estimate steps using 0.75 meters per step. GPS noise is filtered by accuracy and plausible walking speed, but estimates can still be inaccurate. Keep the page open; browser background tracking is unreliable. No route history is retained. Avoid logging the same walk again from your phone total.
 - Your first check-in saves a daily spot with explicit confirmation. Subsequent check-ins require GPS accuracy within 100 m and a position within 200 m of that spot. One check-in earns 50 XP per local calendar day. Activity keeps a consecutive-day streak.
@@ -33,4 +33,6 @@ The Google Fonts stylesheet is optional; the app falls back to system fonts if u
 
 ## Visual design
 
-The home page uses a parchment character-sheet layout with an original ink-and-cel-shaded fantasy illustration in `assets/adventurer.png`. The illustration is shared companion artwork; class, ancestry, and gender update the sheet details, but do not yet generate different artwork. The build copies the assets directory into the GitHub Pages artifact.
+The home page uses a parchment character-sheet layout with original ink-and-cel-shaded fantasy artwork. `assets/characters/` holds nine transparent ancestry atlases. Each has male/female columns and teen/adult/elderly rows. `character-art.js` maps each of the 54 choices to its atlas cell; both the editor preview and saved character use the same mapping. Artwork is pre-generated, so no external image API or keys are needed at runtime. Class outfits are shared for now. The build copies the assets directory into the GitHub Pages artifact.
+
+Previously saved characters retain their name, class, ancestry, and XP. Missing ages default to Adult. Gender values outside the two current options default to Female and can be changed in Edit character. Editing appearance never resets activity history.

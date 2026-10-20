@@ -1,18 +1,44 @@
+import { artworkFor, normalizeAppearance, ANCESTRY_NOTES } from './character-art.js';
 import { dayKey, dayXP, progress, distance, streak } from './progress.js';
 const $ = id => document.getElementById(id);
 const KEY = 'level-up-life-v1';
 let state = { character:null, days:{}, spot:null };
 try { const saved=JSON.parse(localStorage.getItem(KEY)); if(saved && saved.days && typeof saved.days==='object') state={...state,...saved}; } catch { /* Start fresh when storage is unavailable or invalid. */ }
+if(state.character) state.character={...state.character,...normalizeAppearance(state.character)};
 let watcher=null, previous=null, walkMeters=0, walkBase=0, activeDay=dayKey(), toastTimer;
 function notify(message){$('toast').textContent=message;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',5500);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{notify('Storage is unavailable. Progress will only last for this session.');}render();}
 function today(){return state.days[dayKey()] ||= { steps:0,checkin:false };}
+const artRequests = new WeakMap();
+function showArtwork(element, character) {
+ const art=artworkFor(character);
+ if(element.dataset.art===`${art.url}:${art.x}:${art.y}`) return;
+ element.dataset.art=`${art.url}:${art.x}:${art.y}`;
+ element.style.backgroundImage='none';
+ element.setAttribute('aria-label',art.label);
+ element.style.setProperty('--stature',art.stature);
+ element.style.setProperty('--frame-aspect',art.aspectRatio);
+ element.classList.add('art-loading');
+ element.querySelector('.art-status').textContent='Preparing your portrait…';
+ const request={};artRequests.set(element,request);
+ const image=new Image();
+ image.onload=()=>{if(artRequests.get(element)!==request)return;element.style.backgroundImage=`url("${art.url}")`;element.style.backgroundSize=`200% ${art.sizeY}%`;element.style.backgroundPosition=`${art.x}% ${art.positionY}%`;element.classList.remove('art-loading');};
+ image.onerror=()=>{if(artRequests.get(element)!==request)return;element.querySelector('.art-status').textContent='Portrait unavailable. Please refresh to try again.';delete element.dataset.art;};
+ image.src=art.url;
+}
+function previewAppearance(){
+ const form=$('character-form');const appearance=normalizeAppearance(Object.fromEntries(new FormData(form)));
+ showArtwork($('character-preview'),appearance);
+ $('preview-title').textContent=`${appearance.age} ${appearance.gender.toLowerCase()} ${appearance.ancestry}`;
+ $('preview-description').textContent=ANCESTRY_NOTES[appearance.ancestry];
+}
 function render(){
+ showArtwork($('character-art'),state.character||{});
  const day=state.days[dayKey()]||{}, p=progress(state.days), s=streak(state.days);
  $('record-level').textContent=String(p.level).padStart(2,'0');
  $('record-xp').textContent=p.xp.toLocaleString()+' XP';
  $('record-streak').textContent=s+' '+(s===1?'day':'days');
- if(state.character){const c=state.character;$('sheet-name').textContent=c.name;$('sheet-class').textContent=c.class+' · Level '+p.level;$('sheet-ancestry').textContent=c.ancestry;$('sheet-gender').textContent=c.gender||'Not specified';}
+ if(state.character){const c=state.character;$('sheet-name').textContent=c.name;$('sheet-class').textContent=c.class+' · Level '+p.level;$('sheet-ancestry').textContent=c.ancestry;$('sheet-gender').textContent=`${c.gender} · ${c.age}`;}
  $('date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
  $('steps').replaceChildren(document.createTextNode((day.steps||0).toLocaleString()+' '),Object.assign(document.createElement('small'),{textContent:'steps'}));
  $('xp').replaceChildren(document.createTextNode(p.xp.toLocaleString()+' '),Object.assign(document.createElement('small'),{textContent:'XP total'}));
@@ -29,9 +55,14 @@ function render(){
  $('location-label').textContent=watcher!==null?'Tracking this walk':state.spot?'Daily spot saved on this device':'Only when you choose';
  $('location').textContent=watcher!==null?'Stop walk':'Start walk';
 }
-function edit(){const form=$('character-form');if(state.character)for(const key of ['name','class','ancestry','gender'])form.elements[key].value=state.character[key]||'';$('character-dialog').showModal();}
+function edit(){
+ const form=$('character-form');const c=state.character||{name:'',class:'Ranger',...normalizeAppearance()};
+ for(const key of ['name','class','ancestry','gender','age']) form.elements[key].value=c[key]||'';
+ previewAppearance();$('character-dialog').showModal();
+}
+$('character-form').addEventListener('change',previewAppearance);
 $('create').onclick=edit;$('edit-top').onclick=edit;$('cancel-character').onclick=()=>$('character-dialog').close();
-$('character-form').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.name=data.name.trim();if(!data.name)return;state.character=data;save();$('character-dialog').close();notify('Your next chapter starts today. Welcome, '+data.name+'!');};
+$('character-form').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.name=data.name.trim();if(!data.name)return;state.character={...data,...normalizeAppearance(data)};save();$('character-dialog').close();notify('Your next chapter starts today. Welcome, '+data.name+'!');};
 $('log').onclick=()=>{if(watcher!==null){notify('Stop your GPS walk before updating the daily total.');return;}$('movement-form').elements.steps.value=today().steps;$('movement-dialog').showModal();};
 $('cancel-movement').onclick=()=>$('movement-dialog').close();
 $('movement-form').onsubmit=e=>{e.preventDefault();const steps=Number(new FormData(e.target).get('steps'));if(!Number.isInteger(steps)||steps<0||steps>100000)return;today().steps=steps;save();$('movement-dialog').close();notify('Movement saved. Every step adds to your story.');};
