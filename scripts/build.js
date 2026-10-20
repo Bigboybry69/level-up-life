@@ -13,5 +13,6 @@ for(const name of names){
  template=template.replaceAll(`"${name}"`,`"${name}?v=${version}"`);
 }
 for(const key of Object.keys(pages)) await writeFile(`dist/${pages[key].file}`,pageHTML(template,key));
+await cp('manifest.webmanifest','dist/manifest.webmanifest');
 await cp('assets','dist/assets',{recursive:true});
 console.log(`Built character, achievements, quests, and connections pages (${version}).`);

@@ -52,3 +52,9 @@ Allocation is generated once and saved with the character; reloading, editing ap
 ## Theme
 
 The sun/moon button in the header switches between light parchment and dark parchment on every page. Without a saved preference, the app follows the device color scheme and reacts to system changes. A manual choice is saved separately from character data and syncs across tabs. Theme initialization runs before the stylesheet to avoid a light flash on dark-mode startup. The toggle also works for the current session if browser storage is blocked.
+
+## Install on iPhone
+
+Open the deployed site in Safari, then choose **Share → Add to Home Screen** (enable **Open as Web App** if offered). Launch the Home Screen icon for standalone mode without Safari's address bar or tabs. An older shortcut may need to be added again after this update; check the new installation before removing the old one. Regular browser tabs retain browser controls.
+
+The web manifest uses relative scope and start URLs for GitHub Pages subpaths, with 192px/512px install icons. All pages also include Apple's standalone metadata and the 180px touch icon. The layout accounts for the status area and Home indicator. This remains a free hosted web app; standalone mode does not add native HealthKit access, offline support, or reliable background GPS tracking.
