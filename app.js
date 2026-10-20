@@ -89,6 +89,7 @@ window.addEventListener('pagehide',stopWalk);
 
 const pages={
  character:{file:'index.html',title:'Your adventure, on paper.',description:'Every step writes a little more of your story.',name:'Character'},
+ achievements:{file:'achievements.html',title:'Your achievements.',description:'Every step, every streak, every level earned.',name:'Achievements'},
  quests:{file:'quests.html',title:'Your daily quests.',description:'Small steps. New chapters. A little more legendary.',name:'Daily quests'},
  connections:{file:'connections.html',title:'Connect your world.',description:'Your journey, your permissions, your choice.',name:'Connections'}
 };

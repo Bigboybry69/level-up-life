@@ -40,3 +40,5 @@ Previously saved characters retain their name, class, ancestry, and XP. Missing 
 ## Pages and navigation
 
 Character (`index.html`), Daily quests (`quests.html`), and Connections (`connections.html`) are separate generated HTML pages. Each includes its own visible content before JavaScript runs, so ordinary links and refresh work even if the navigation script cannot load. When JavaScript is available, navigation updates the screen without interrupting a GPS walk. All pages share the same saved character and activity history. Old hash links redirect to the matching page. The build versions CSS, JavaScript, and module imports together to avoid mixed cached releases. Run `npm run dev` to build and serve the pages from `dist`.
+
+Achievements (`achievements.html`) contains the character details, achievements record, XP, movement, and streak panels. The character home screen is a viewport-sized portrait with character editing, designed to fit an iPhone 16 viewport (393 × 852 CSS pixels) and shorter browser viewports without page scrolling.

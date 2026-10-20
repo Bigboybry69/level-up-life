@@ -7,7 +7,7 @@ test('every generated page starts with exactly its own content visible without J
  for(const key of Object.keys(pages)){
   const html=pageHTML(template,key);
   const sections=[...html.matchAll(/<section class="page-view[^"]*" id="page-([^"]+)"[^>]*>/g)];
-  assert.equal(sections.length,3);
+  assert.equal(sections.length,4);
   assert.deepEqual(sections.filter(m=>!m[0].includes(' hidden')).map(m=>m[1]),[key]);
   assert.ok(html.includes(`<title>${pages[key].name} · Level Up Life</title>`));
   assert.ok(html.includes(`<a href="${pages[key].file}" aria-current="page">`));

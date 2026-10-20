@@ -14,4 +14,4 @@ for(const name of names){
 }
 for(const key of Object.keys(pages)) await writeFile(`dist/${pages[key].file}`,pageHTML(template,key));
 await cp('assets','dist/assets',{recursive:true});
-console.log(`Built character, quests, and connections pages (${version}).`);
+console.log(`Built character, achievements, quests, and connections pages (${version}).`);
