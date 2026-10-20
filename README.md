@@ -48,3 +48,7 @@ Achievements (`achievements.html`) contains the character details, achievements 
 Six ability scores flank the portrait: Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma, with their 5e modifiers. All 13 listed classes, including Artificer, use the base standard array **15, 14, 13, 12, 10, 8**. A single primary gets 15 and the selected secondary gets 14. Monk (DEX/WIS), Paladin (STR/CHA), and Ranger (DEX/WIS) have two primary abilities receiving 15 and 14; their secondary gets 13. Class alternatives follow the reference priorities (for example, Fighter randomly chooses STR or DEX). Remaining scores are shuffled among the remaining abilities.
 
 Allocation is generated once and saved with the character; reloading, editing appearance, or earning XP does not reroll it. Changing class generates a matching allocation with a preview before saving. Cancel leaves saved scores unchanged. Existing characters gain saved scores automatically without changing activity history. These are base scores, without ancestry bonuses or level-based ability increases.
+
+## Theme
+
+The sun/moon button in the header switches between light parchment and dark parchment on every page. Without a saved preference, the app follows the device color scheme and reacts to system changes. A manual choice is saved separately from character data and syncs across tabs. Theme initialization runs before the stylesheet to avoid a light flash on dark-mode startup. The toggle also works for the current session if browser storage is blocked.

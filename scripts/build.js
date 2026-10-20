@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile, cp } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { pages, pageHTML } from './pages.js';
 await mkdir('dist', { recursive: true });
-const names=['style.css','app.js','progress.js','character-art.js','abilities.js'];
+const names=['style.css','app.js','progress.js','character-art.js','abilities.js','theme.js'];
 const files=Object.fromEntries(await Promise.all(names.map(async file=>[file,await readFile(file,'utf8')])));
 const version=createHash('sha256').update(names.map(name=>files[name]).join('\n')).digest('hex').slice(0,12);
 let template=await readFile('index.html','utf8');
