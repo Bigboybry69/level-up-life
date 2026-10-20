@@ -30,3 +30,7 @@ Push this project to the repository's `main` branch. In GitHub **Settings → Pa
 This is an editable prototype: manual totals are trusted and local state can be edited. It is not an anti-cheat system or an official Dungeons & Dragons product. Next steps could include authentication, a database with private per-user records, native health integration, and more character artwork.
 
 The Google Fonts stylesheet is optional; the app falls back to system fonts if unavailable.
+
+## Visual design
+
+The home page uses a parchment character-sheet layout with an original ink-and-cel-shaded fantasy illustration in `assets/adventurer.png`. The illustration is shared companion artwork; class, ancestry, and gender update the sheet details, but do not yet generate different artwork. The build copies the assets directory into the GitHub Pages artifact.

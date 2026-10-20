@@ -9,6 +9,10 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{notif
 function today(){return state.days[dayKey()] ||= { steps:0,checkin:false };}
 function render(){
  const day=state.days[dayKey()]||{}, p=progress(state.days), s=streak(state.days);
+ $('record-level').textContent=String(p.level).padStart(2,'0');
+ $('record-xp').textContent=p.xp.toLocaleString()+' XP';
+ $('record-streak').textContent=s+' '+(s===1?'day':'days');
+ if(state.character){const c=state.character;$('sheet-name').textContent=c.name;$('sheet-class').textContent=c.class+' · Level '+p.level;$('sheet-ancestry').textContent=c.ancestry;$('sheet-gender').textContent=c.gender||'Not specified';}
  $('date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
  $('steps').replaceChildren(document.createTextNode((day.steps||0).toLocaleString()+' '),Object.assign(document.createElement('small'),{textContent:'steps'}));
  $('xp').replaceChildren(document.createTextNode(p.xp.toLocaleString()+' '),Object.assign(document.createElement('small'),{textContent:'XP total'}));
