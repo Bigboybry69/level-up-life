@@ -1,3 +1,4 @@
+import { ABILITIES, abilitiesFor, modifier } from './abilities.js';
 import { artworkFor, normalizeAppearance, ANCESTRY_NOTES } from './character-art.js';
 import { dayKey, dayXP, progress, distance, streak } from './progress.js';
 const $ = id => document.getElementById(id);
@@ -5,6 +6,12 @@ const KEY = 'level-up-life-v1';
 let state = { character:null, days:{}, spot:null };
 try { const saved=JSON.parse(localStorage.getItem(KEY)); if(saved && saved.days && typeof saved.days==='object') state={...state,...saved}; } catch { /* Start fresh when storage is unavailable or invalid. */ }
 if(state.character) state.character={...state.character,...normalizeAppearance(state.character)};
+if(state.character){
+ const previous=state.character.abilities;
+ state.character.abilities=abilitiesFor(state.character.class,previous);
+ if(previous!==state.character.abilities) try{localStorage.setItem(KEY,JSON.stringify(state));}catch{}
+}
+let draftAbilities={};
 let watcher=null, previous=null, walkMeters=0, walkBase=0, activeDay=dayKey(), toastTimer;
 function notify(message){$('toast').textContent=message;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',5500);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{notify('Storage is unavailable. Progress will only last for this session.');}render();}
@@ -26,13 +33,31 @@ function showArtwork(element, character) {
  image.onerror=()=>{if(artRequests.get(element)!==request)return;element.querySelector('.art-status').textContent='Portrait unavailable. Please refresh to try again.';delete element.dataset.art;};
  image.src=art.url;
 }
+function renderAbilities(){
+ const abilities=state.character?.abilities;
+ for(const [key,name] of Object.entries(ABILITIES)){
+  const card=$('ability-'+key),score=abilities?.scores[key];
+  const role=abilities?.primary.includes(key)?'Primary':abilities?.secondary===key?'Secondary':'';
+  card.querySelector('.ability-score').textContent=score??'—';
+  card.querySelector('.ability-mod').textContent=score===undefined?'—':modifier(score);
+  card.querySelector('.ability-role').textContent=role;
+  card.dataset.priority=role.toLowerCase();
+  card.setAttribute('aria-label',score===undefined?name+' · create a character':`${name}: ${score}, modifier ${modifier(score)}${role?', '+role:''}`);
+ }
+}
 function previewAppearance(){
- const form=$('character-form');const appearance=normalizeAppearance(Object.fromEntries(new FormData(form)));
+ const form=$('character-form');
+ const className=form.elements.class.value;
+ const abilities=draftAbilities[className] ||= abilitiesFor(className,state.character?.abilities);
+ $('ability-preview-scores').replaceChildren(...Object.keys(ABILITIES).map(key=>{const el=document.createElement('span');el.textContent=`${key} ${abilities.scores[key]} (${modifier(abilities.scores[key])})`;el.className=abilities.primary.includes(key)?'priority-primary':abilities.secondary===key?'priority-secondary':'';return el;}));
+ $('ability-preview-note').textContent=`Primary: ${abilities.primary.map(key=>ABILITIES[key]).join(' & ')}. Secondary: ${ABILITIES[abilities.secondary]}. ${abilities.primary.length===2?'Primary abilities receive 15 and 14; secondary receives 13.':'Primary receives 15; secondary receives 14.'} Remaining scores are shuffled once.`;
+ const appearance=normalizeAppearance(Object.fromEntries(new FormData(form)));
  showArtwork($('character-preview'),appearance);
  $('preview-title').textContent=`${appearance.age} ${appearance.gender.toLowerCase()} ${appearance.ancestry}`;
  $('preview-description').textContent=ANCESTRY_NOTES[appearance.ancestry];
 }
 function render(){
+ renderAbilities();
  if(!$('page-character').hidden) showArtwork($('character-art'),state.character||{});
  const day=state.days[dayKey()]||{}, p=progress(state.days), s=streak(state.days);
  $('quest-summary').textContent=`${(day.steps||0).toLocaleString()} steps · ${dayXP(day).toLocaleString()} XP today`;
@@ -57,13 +82,14 @@ function render(){
  $('location').textContent=watcher!==null?'Stop walk':'Start walk';
 }
 function edit(){
+ draftAbilities={};
  const form=$('character-form');const c=state.character||{name:'',class:'Ranger',...normalizeAppearance()};
  for(const key of ['name','class','ancestry','gender','age']) form.elements[key].value=c[key]||'';
  previewAppearance();$('character-dialog').showModal();
 }
 $('character-form').addEventListener('change',previewAppearance);
 $('create').onclick=edit;$('edit-top').onclick=edit;$('cancel-character').onclick=()=>$('character-dialog').close();
-$('character-form').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.name=data.name.trim();if(!data.name)return;state.character={...data,...normalizeAppearance(data)};save();$('character-dialog').close();notify('Your next chapter starts today. Welcome, '+data.name+'!');};
+$('character-form').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.name=data.name.trim();if(!data.name)return;state.character={...data,...normalizeAppearance(data),abilities:abilitiesFor(data.class,draftAbilities[data.class]||state.character?.abilities)};save();$('character-dialog').close();notify('Your next chapter starts today. Welcome, '+data.name+'!');};
 $('log').onclick=()=>{if(watcher!==null){notify('Stop your GPS walk before updating the daily total.');return;}$('movement-form').elements.steps.value=today().steps;$('movement-dialog').showModal();};
 $('cancel-movement').onclick=()=>$('movement-dialog').close();
 $('movement-form').onsubmit=e=>{e.preventDefault();const steps=Number(new FormData(e.target).get('steps'));if(!Number.isInteger(steps)||steps<0||steps>100000)return;today().steps=steps;save();$('movement-dialog').close();notify('Movement saved. Every step adds to your story.');};
