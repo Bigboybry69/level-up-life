@@ -33,8 +33,9 @@ function previewAppearance(){
  $('preview-description').textContent=ANCESTRY_NOTES[appearance.ancestry];
 }
 function render(){
- showArtwork($('character-art'),state.character||{});
+ if(!$('page-character').hidden) showArtwork($('character-art'),state.character||{});
  const day=state.days[dayKey()]||{}, p=progress(state.days), s=streak(state.days);
+ $('quest-summary').textContent=`${(day.steps||0).toLocaleString()} steps · ${dayXP(day).toLocaleString()} XP today`;
  $('record-level').textContent=String(p.level).padStart(2,'0');
  $('record-xp').textContent=p.xp.toLocaleString()+' XP';
  $('record-streak').textContent=s+' '+(s===1?'day':'days');
@@ -85,4 +86,30 @@ $('location').onclick=()=>{
 $('reset').onclick=()=>{if(!confirm('Delete your character, activity history, and saved daily spot from this browser? This cannot be undone.'))return;stopWalk();state={character:null,days:{},spot:null};save();location.reload();};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
 window.addEventListener('pagehide',stopWalk);
-render();
+
+const pages={
+ character:{title:'Your adventure, on paper.',description:'Every step writes a little more of your story.',name:'Character'},
+ quests:{title:'Your daily quests.',description:'Small steps. New chapters. A little more legendary.',name:'Daily quests'},
+ connections:{title:'Connect your world.',description:'Your journey, your permissions, your choice.',name:'Connections'}
+};
+function navigate(){
+ const requested=location.hash.slice(1);
+ const page=Object.hasOwn(pages,requested)?requested:'character';
+ if(requested!==page) history.replaceState(null,'',`#${page}`);
+ for(const key of Object.keys(pages)) $('page-'+key).hidden=key!==page;
+ for(const link of document.querySelectorAll('nav a')){
+  if(link.hash===`#${page}`) link.setAttribute('aria-current','page');
+  else link.removeAttribute('aria-current');
+ }
+ $('page-title').textContent=pages[page].title;
+ $('page-description').textContent=pages[page].description;
+ document.title=`${pages[page].name} · Level Up Life`;
+ render();window.scrollTo({top:0,behavior:'instant'});
+ $('page-title').focus({preventScroll:true});
+}
+document.querySelector('nav').addEventListener('click',event=>{
+ const link=event.target.closest('a');
+ if(link && link.hash===location.hash){event.preventDefault();navigate();}
+});
+window.addEventListener('hashchange',navigate);
+navigate();

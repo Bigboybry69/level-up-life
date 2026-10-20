@@ -36,3 +36,7 @@ The Google Fonts stylesheet is optional; the app falls back to system fonts if u
 The home page uses a parchment character-sheet layout with original ink-and-cel-shaded fantasy artwork. `assets/characters/` holds nine transparent ancestry atlases. Each has male/female columns and teen/adult/elderly rows. `character-art.js` maps each of the 54 choices to its atlas cell; both the editor preview and saved character use the same mapping. Artwork is pre-generated, so no external image API or keys are needed at runtime. Class outfits are shared for now. The build copies the assets directory into the GitHub Pages artifact.
 
 Previously saved characters retain their name, class, ancestry, and XP. Missing ages default to Adult. Gender values outside the two current options default to Female and can be changed in Edit character. Editing appearance never resets activity history.
+
+## Pages and navigation
+
+Character (`#character`), Daily quests (`#quests`), and Connections (`#connections`) have separate screens with shareable URLs. The navigation stays available at the top. Hash routing supports GitHub Pages without server rewrites, including refresh and browser back/forward, and keeps an active GPS walk running while switching screens. All screens share the same saved character and activity history.
