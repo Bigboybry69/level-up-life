@@ -39,4 +39,4 @@ Previously saved characters retain their name, class, ancestry, and XP. Missing 
 
 ## Pages and navigation
 
-Character (`#character`), Daily quests (`#quests`), and Connections (`#connections`) have separate screens with shareable URLs. The navigation stays available at the top. Hash routing supports GitHub Pages without server rewrites, including refresh and browser back/forward, and keeps an active GPS walk running while switching screens. All screens share the same saved character and activity history.
+Character (`index.html`), Daily quests (`quests.html`), and Connections (`connections.html`) are separate generated HTML pages. Each includes its own visible content before JavaScript runs, so ordinary links and refresh work even if the navigation script cannot load. When JavaScript is available, navigation updates the screen without interrupting a GPS walk. All pages share the same saved character and activity history. Old hash links redirect to the matching page. The build versions CSS, JavaScript, and module imports together to avoid mixed cached releases. Run `npm run dev` to build and serve the pages from `dist`.

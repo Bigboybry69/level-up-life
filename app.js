@@ -88,28 +88,41 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();}
 window.addEventListener('pagehide',stopWalk);
 
 const pages={
- character:{title:'Your adventure, on paper.',description:'Every step writes a little more of your story.',name:'Character'},
- quests:{title:'Your daily quests.',description:'Small steps. New chapters. A little more legendary.',name:'Daily quests'},
- connections:{title:'Connect your world.',description:'Your journey, your permissions, your choice.',name:'Connections'}
+ character:{file:'index.html',title:'Your adventure, on paper.',description:'Every step writes a little more of your story.',name:'Character'},
+ quests:{file:'quests.html',title:'Your daily quests.',description:'Small steps. New chapters. A little more legendary.',name:'Daily quests'},
+ connections:{file:'connections.html',title:'Connect your world.',description:'Your journey, your permissions, your choice.',name:'Connections'}
 };
+function routeFromURL(url){
+ const file=url.pathname.split('/').pop();
+ return Object.keys(pages).find(key=>pages[key].file===file)||'character';
+}
 function navigate(){
- const requested=location.hash.slice(1);
- const page=Object.hasOwn(pages,requested)?requested:'character';
- if(requested!==page) history.replaceState(null,'',`#${page}`);
+ const legacy=location.hash.slice(1);
+ if(Object.prototype.hasOwnProperty.call(pages,legacy)) history.replaceState(null,'',new URL(pages[legacy].file,location.href));
+ const page=routeFromURL(new URL(location.href));
  for(const key of Object.keys(pages)) $('page-'+key).hidden=key!==page;
  for(const link of document.querySelectorAll('nav a')){
-  if(link.hash===`#${page}`) link.setAttribute('aria-current','page');
+  if(routeFromURL(new URL(link.href))===page) link.setAttribute('aria-current','page');
   else link.removeAttribute('aria-current');
  }
  $('page-title').textContent=pages[page].title;
  $('page-description').textContent=pages[page].description;
  document.title=`${pages[page].name} · Level Up Life`;
+ document.body.dataset.page=page;
  render();window.scrollTo({top:0,behavior:'instant'});
  $('page-title').focus({preventScroll:true});
 }
-document.querySelector('nav').addEventListener('click',event=>{
- const link=event.target.closest('a');
- if(link && link.hash===location.hash){event.preventDefault();navigate();}
+document.addEventListener('click',event=>{
+ const link=event.target.closest('a[href]');
+ if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target||link.hasAttribute('download'))return;
+ const url=new URL(link.href);
+ const current=new URL(location.href);
+ if(url.origin!==current.origin||url.pathname.slice(0,url.pathname.lastIndexOf('/'))!==current.pathname.slice(0,current.pathname.lastIndexOf('/')))return;
+ if(!Object.values(pages).some(page=>url.pathname.endsWith('/'+page.file)))return;
+ event.preventDefault();
+ if(url.href!==location.href) history.pushState(null,'',url);
+ navigate();
 });
+window.addEventListener('popstate',navigate);
 window.addEventListener('hashchange',navigate);
 navigate();
